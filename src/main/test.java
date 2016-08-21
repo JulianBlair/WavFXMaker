@@ -16,6 +16,7 @@ public class test {
         //wave.repeat(10);
         //wave.extend(50);
         //wave.delay(2000, 0.8, 1);
+        //wave.visual(50);
         
         WavDataHandler.write(wave, INPUT_FILE, OUTPUT_FILE);
 	}

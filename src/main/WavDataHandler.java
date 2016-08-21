@@ -129,21 +129,23 @@ public class WavDataHandler {
         }
         dos.writeInt(little2big(o.buf.length * o.channels * bytespersample));
         System.out.println("DONE");
+        
         System.out.print("Write data progress:\t");
         int i = 0, datasize = o.buf.length;
 		for (double f : o.buf) {
        		perc(i,datasize);
        		i++;
 			byte[] d = null;
+			long rnd = Math.round(f);
 			switch (bytespersample) {
 			case 4: 
-				d = big2little((float) f);
+				d = big2little((int) rnd);
 				break;
 			case 2: 
-				d = big2little((short) Math.round(f));
+				d = big2little((short) rnd);
 				break;
 			case 1: 
-				d = big2little((byte) Math.round(f));
+				d = big2little((byte) rnd);
 				break;
 			}
 			for (int j = 0; j < bytespersample; j++) {
@@ -156,7 +158,7 @@ public class WavDataHandler {
 	static float parse(byte[] d, int bytespersample) {
 		switch (bytespersample) {
 			case 4: 
-				return ByteBuffer.wrap(d).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+				return ByteBuffer.wrap(d).order(ByteOrder.LITTLE_ENDIAN).getInt();
 			case 2: 
 				return ByteBuffer.wrap(d).order(ByteOrder.LITTLE_ENDIAN).getShort();
 			case 1: 
@@ -166,13 +168,12 @@ public class WavDataHandler {
 		}
 	}
 	
-	static byte[] big2little(float i) {
-		int bits = Float.floatToIntBits(i);
+	static byte[] big2little(int i) {
 		byte[] bytes = new byte[4];
-		bytes[0] = (byte)(bits & 0xff);
-		bytes[1] = (byte)((bits >> 8) & 0xff);
-		bytes[2] = (byte)((bits >> 16) & 0xff);
-		bytes[3] = (byte)((bits >> 24) & 0xff);
+		bytes[0] = (byte)(i & 0xff);
+		bytes[1] = (byte)((i >> 8) & 0xff);
+		bytes[2] = (byte)((i >> 16) & 0xff);
+		bytes[3] = (byte)((i >> 24) & 0xff);
 		return bytes;
 	}
 	
@@ -183,33 +184,17 @@ public class WavDataHandler {
 		return bytes;
 	}
 	
+	static byte[] big2little(byte i) {
+		byte[] bytes = {i};
+		return bytes;
+	}
+	
 	static int little2big(int i) {
 	    return i<<24 | i>>8 & 0xff00 | i<<8 & 0xff0000 | i>>>24;
 	}
 	
 	static short little2big(short i) {
 	    return (short) (i<<8 | i>>8);
-	}
-	
-	static void visual(float[] buf, int width, int datasize) {
-		float min = Float.MAX_VALUE;
-        float max = Float.MIN_VALUE;
-        
-        for (int i = 0; i < datasize; i++) {
-       	 if (buf[i] < min) min = buf[i];
-       	 if (buf[i] > max) max = buf[i];
-        }
-        
-        for (int i = 0; i < datasize; i++) {
-       	 int pos = (int) Math.round((buf[i]-min)/(max-min)*width);
-       	 StringBuffer b = new StringBuffer();
-       	 for (int k = 0; k < 4; k++) b.append(" ");
-       	 int j = 0;
-       	 while (j < pos) {b.append(" "); j++;}
-       	 b.append("x"); j++;
-       	 while (j < width) {b.append(" "); j++;}
-       	 System.out.println(b.toString());
-        }
 	}
 	
 	private static void perc(int i, int len) {

@@ -80,4 +80,25 @@ public class WavObj {
    	 	double prog = i / (double) len;
    	 	if (i % (len/10) == 0) System.out.printf("%.2f%%...",prog*100);
 	}
+	
+	void visual(int width) {
+		double min = Double.MAX_VALUE;
+        double max = Double.MIN_VALUE;
+        
+        for (int i = 0; i < buf.length; i++) {
+       		if (buf[i] < min) min = buf[i];
+       		if (buf[i] > max) max = buf[i];
+        }
+        
+        for (int i = 0; i < buf.length; i++) {
+       		int pos = (int) Math.round((buf[i]-min)/(max-min)*width);
+       		StringBuffer b = new StringBuffer();
+       		for (int k = 0; k < 4; k++) b.append(" ");
+       		int j = 0;
+       		while (j < pos) {b.append(" "); j++;}
+       		b.append("x"); j++;
+       		while (j < width) {b.append(" "); j++;}
+       		System.out.println(b.toString());
+        }
+	}
 }
