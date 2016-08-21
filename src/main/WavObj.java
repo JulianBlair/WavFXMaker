@@ -17,13 +17,26 @@ public class WavObj {
 	
 	public void append(WavObj second, double vol) {
 		System.out.println("---COMBINING TWO WAVS---");
-		if (vol < 0 || this.channels != second.channels || this.samplerate != second.samplerate) return;
+		if (vol < 0 || this.channels != second.channels || this.bitdepth < second.bitdepth) return;
+		second.convertSamplerate(this.samplerate);
 		double[] temp = new double[this.buf.length + second.getDataSize()];
 		for (int i = 0; i < this.buf.length; i++)
 			temp[i] = this.buf[i];
 		for (int i = 0; i < second.getDataSize(); i++)
 			temp[this.buf.length+i] = second.value(i)*this.amplitude/second.amplitude*vol;
 		this.update(temp);
+		System.out.println("DONE");
+	}
+	
+	public void mix(WavObj second, double vol, double start) {
+		System.out.println("---MIXING TWO WAVS---");
+		int a = (int) (start*this.samplerate);
+		if (a < 0 || a >= this.getDataSize() || vol < 0 || this.channels != second.channels || this.bitdepth < second.bitdepth) return;
+		second.convertSamplerate(this.samplerate);
+		for (int i = 0; (i < second.getDataSize() && a+i < this.getDataSize()); i++)
+			buf[a+i] += second.value(i)*this.amplitude/second.amplitude*vol;
+		update();
+		System.out.println("DONE");
 	}
 	
 	/**
@@ -173,7 +186,8 @@ public class WavObj {
 		for (int i = 0; i < buf.length; i++) {
 			WavDataHandler.perc(i, buf.length, 10);
 			buf[i] *= factor;
-		} 
+		}
+		update();
         System.out.println("100.00%");
 	}
 	
@@ -197,6 +211,7 @@ public class WavObj {
 	}
 	
 	public void convertSamplerate(int samplerate) {
+		if (this.samplerate == samplerate) return;
 		this.pitch(this.samplerate/(double)samplerate);
 		System.out.println("---SAMPLE RATE CONVERTED FROM "+this.samplerate+" Hz TO "+samplerate+" Hz---");
 		this.samplerate = samplerate;
@@ -233,6 +248,10 @@ public class WavObj {
 	
 	private void update(double[] newar) {
 		this.buf = newar;
+		update();
+	}
+	
+	private void update() {
 		amplitude = this.amplitude();
 	}
 	
