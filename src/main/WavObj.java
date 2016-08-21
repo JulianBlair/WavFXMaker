@@ -116,8 +116,9 @@ public class WavObj {
 		System.out.println("100.00%");
 	}
 	
-	public void delay(int freq, double decay, double wetvol) {
+	public void delay(double secs, double decay, double wetvol) {
         System.out.println("---EFFECT: DELAY---");
+        int freq = (int) (secs*this.samplerate);
 		if (freq > buf.length || freq <= 0 || decay >= 1 || decay <= 0 || wetvol > 1 || wetvol < 0) return;
 		double[] wet = new double[buf.length];
         System.out.print("Processing:\t\t");
@@ -134,9 +135,9 @@ public class WavObj {
         System.out.println("100.00%");
 	}
 	
-	public void extend(int times) {
+	public void extend(double secs) {
         System.out.println("---EFFECT: EXTEND WITH SILENCE---");
-		double[] temp = new double[buf.length*times];
+		double[] temp = new double[(int)(buf.length+secs*this.samplerate)];
         System.out.print("Processing:\t\t");
 		for (int i = 0; i < buf.length; i++) {
 			WavDataHandler.perc(i, buf.length, 10);

@@ -16,8 +16,8 @@ public class test {
         WavObj wave = WavDataHandler.read(INPUT_FILE);
 
         //wave.repeat(10);
-        //wave.extend(50);
-        //wave.delay(2000, 0.5, 1);
+        wave.extend(3.5);
+        wave.delay(0.5, 0.5, 1);
         //wave.visual(50, 100);
         //wave.reverse();
         //wave.pitch(0.2);
