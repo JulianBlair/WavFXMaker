@@ -9,8 +9,6 @@ public class WavDataHandler {
 	
     static DataInputStream dis = null;
     static DataOutputStream dos = null;
-	static InputStream is = null;
-	static OutputStream os = null;
 		
 	static WavObj read(String in) throws IOException {  
 		
@@ -19,12 +17,9 @@ public class WavDataHandler {
 		System.out.println("---READING FILE---");
 		
 		try {  
-			
-			// create file input stream
-	        is = new FileInputStream(in);
 	        
 	        // create new data input stream
-	        dis = new DataInputStream(is); 
+	        dis = new DataInputStream(new FileInputStream(in)); 
 	        
 	         boolean discard = true;
 	         while (discard) {
@@ -81,8 +76,6 @@ public class WavDataHandler {
 	         e.printStackTrace();
 	      }finally{
 	         // releases all system resources from the streams
-	         if(is!=null)
-	            is.close();
 	         if(dis!=null)
 	            dis.close();
 	      }
@@ -94,13 +87,10 @@ public class WavDataHandler {
 	
 	static void write(WavObj o, String in, String out) throws IOException {
 		System.out.println("---WRITING FILE---");
-		// create file input stream
-        is = new FileInputStream(in);
-        os = new FileOutputStream(out);
-         
-        // create new data input stream
-        dis = new DataInputStream(is);   
-        dos = new DataOutputStream(os); 
+         try {
+        // create new data I/O stream
+        dis = new DataInputStream(new FileInputStream(in));   
+        dos = new DataOutputStream(new FileOutputStream(out)); 
          
         int bytespersample = o.bitspersample / 8;
         System.out.print("Writing header...");
@@ -152,7 +142,16 @@ public class WavDataHandler {
        		 dos.writeByte(d[j]);
        	 	}
 		}
-        System.out.println("100.00%");
+		System.out.println("100.00%");
+     	}catch(Exception e){
+			e.printStackTrace();
+     	}finally{
+     		// releases all system resources from the streams
+     		if(dis!=null)
+     			dis.close();
+     		if(dos!=null)
+     			dos.close();
+     	}
 	}
 	
 	static float parse(byte[] d, int bytespersample) {
