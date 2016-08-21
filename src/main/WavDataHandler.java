@@ -61,7 +61,7 @@ public class WavDataHandler {
 	         System.out.print("Read data progress:\t");
 	         
 	         for (int i = 0; i < datasize; i++) {
-	        	 perc(i,datasize);
+	        	 perc(i,datasize,10);
 	        	 byte[] d = new byte[bytespersample];
 	        	 for (int j = 0; j < bytespersample; j++) {
 	        		 d[j] = dis.readByte();
@@ -123,7 +123,7 @@ public class WavDataHandler {
         System.out.print("Write data progress:\t");
         int i = 0, datasize = o.buf.length;
 		for (double f : o.buf) {
-       		perc(i,datasize);
+       		perc(i,datasize,10);
        		i++;
 			byte[] d = null;
 			long rnd = Math.round(f);
@@ -196,8 +196,11 @@ public class WavDataHandler {
 	    return (short) (i<<8 | i>>8);
 	}
 	
-	private static void perc(int i, int len) {
+	protected static void perc(int i, int len, int freq) {
    	 	double prog = i / (double) len;
-   	 	if (i % (len/10) == 0) System.out.printf("%.2f%%...",prog*100);
+   	 	if (len >= freq && i % (len/freq) == 0 && prog < 0.99) {
+   	 		System.out.printf("%.2f%%...",prog*100);
+   		 	if (prog < 0.1) System.out.print(" ");
+   	 	}
 	}
 }
