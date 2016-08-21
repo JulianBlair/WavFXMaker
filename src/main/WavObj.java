@@ -15,8 +15,25 @@ public class WavObj {
 	}
 	
 	public void diff(int order) {
-		if (order <= 0) return;
+		System.out.println("---EFFECT: DIFFERENTIATOR---");
+		if (order < 1) return;
+		System.out.print("Processing:\t\t");
+		double amp1 = amplitude(buf.length/2,buf.length);
 		
+		double[] temp = new double[buf.length-order];
+		for (int i = 1; i <= order; i++) 
+			for (int j = 0; j < buf.length-i; j++) {
+				WavDataHandler.perc((buf.length-i)*(i-1)+j, buf.length*order, 10);
+				buf[j] = buf[j+1] - buf[j];
+			}
+		
+		double amp2 = amplitude(buf.length/2,buf.length);
+		
+		for (int i = 0; i < buf.length-order; i++)
+			temp[i] = buf[i]*amp1/amp2;
+		
+		buf = temp;
+        System.out.println("100.00%");
 	}
 	
 	public void pitch(double factor) {
@@ -64,7 +81,7 @@ public class WavObj {
 		System.out.print("Processing:\t\t");
 		int start = l, end = r;
 		while (l < r) {
-			WavDataHandler.perc(l-start, end-start, 20);
+			WavDataHandler.perc((l-start)*2, end-start, 10);
 			double temp = buf[l];
 			buf[l] = buf[r];
 			buf[r] = temp;

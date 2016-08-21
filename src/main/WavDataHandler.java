@@ -200,7 +200,7 @@ public class WavDataHandler {
    	 	double prog = i / (double) len;
    	 	if (len >= freq && i % (len/freq) == 0 && prog < 0.99) {
    	 		System.out.printf("%.2f%%...",prog*100);
-   		 	if (prog < 0.1) System.out.print(" ");
+   		 	if (Math.round(prog*100*100)/100 < 10) System.out.print(" ");
    	 	}
 	}
 }
