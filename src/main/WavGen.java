@@ -52,16 +52,28 @@ public class WavGen {
 		return new WavObj(channels, bitdepth, samplerate, buf);
 	}
 	
+	public WavObj siren(int freq, int amp, double secs) {
+		int size = (int) (secs * this.samplerate);
+		double[] buf = new double[size];
+		for (int i = 0; i < size; i++) {
+			double second = 10*Math.sin(i/(double)this.samplerate*10*2*Math.PI);
+			double period = this.samplerate/(freq+second);
+			buf[i] = 20000*Math.sin(i/period*2*Math.PI);
+		}
+		return new WavObj(channels, bitdepth, samplerate, buf);
+	}
+	
 	public WavObj metronome(int bpm, double secs, int timesig) {
 		WavObj met = this.silence(secs);
-		double beeplength = 0.1;
+		double beeplength = 0.06;
 		int freq = 900;
 		double period = 60 / (double) bpm;
+		met.suppress = true;
 		for (int i = 0; i*period*this.samplerate < met.getDataSize(); i++) {
 			if (i % timesig == 0) met.mix(sine(freq, beeplength), 1, false, i*period);
 			else met.mix(sine(freq/2, beeplength), 1, false, i*period);
 		}
-		
+		met.suppress = false;
 		return met;
 	}
 }
