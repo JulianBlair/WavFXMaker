@@ -9,7 +9,7 @@ public class WavObj {
 	private double amplitude;
 	boolean suppress = false;
 	
-	WavObj (short channels, short bitdepth, int samplerate, double[] buf) {
+	public WavObj (short channels, short bitdepth, int samplerate, double[] buf) {
 		this.channels = channels;
 		this.bitdepth = bitdepth;
 		this.samplerate = samplerate;
