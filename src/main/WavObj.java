@@ -3,47 +3,33 @@ package main;
 import java.util.*;
 
 public class WavObj {
-	private short channels, bitspersample;
+	private short channels, bitdepth;
 	private int samplerate;
 	private double[] buf;
 	
 	WavObj (short channels, short bitspersample, int samplerate, double[] buf) {
 		this.channels = channels;
-		this.bitspersample = bitspersample;
+		this.bitdepth = bitspersample;
 		this.samplerate = samplerate;
 		this.buf = buf;
 	}
 	
-	public double value(int i) {
-		if (i < 0 || i >= buf.length) return -1;
-		return buf[i];
-	}
-	
-	public int getDataSize() {
-		return this.buf.length;
-	}
-	
-	public short getBitsPerSample() {
-		return this.bitspersample;
-	}
-	
-	public int getBytesPerSample() {
-		return this.bitspersample / 8;
-	}
-	
-	public short getChannels() {
-		return channels;
-	}
-	
-	public int getSampleRate() {
-		return samplerate;
+	public void append(WavObj second, double vol) {
+		if (vol < 0 || this.channels != second.channels || this.samplerate != second.samplerate) return;
+		double[] temp = new double[this.buf.length + second.getDataSize()];
+		double amp1 = this.amplitude(), amp2 = second.amplitude();
+		for (int i = 0; i < this.buf.length; i++)
+			temp[i] = this.buf[i];
+		for (int i = 0; i < second.getDataSize(); i++)
+			temp[this.buf.length+i] = second.value(i)*amp1/amp2*vol;
+		this.buf = temp;
 	}
 	
 	public void diff(int order) {
 		System.out.println("---EFFECT: DIFFERENTIATOR---");
 		if (order < 1) return;
 		System.out.print("Processing:\t\t");
-		double amp1 = amplitude(buf.length/2,buf.length);
+		double amp1 = amplitude();
 		
 		double[] temp = new double[buf.length-order];
 		for (int i = 1; i <= order; i++) 
@@ -52,7 +38,7 @@ public class WavObj {
 				buf[j] = buf[j+1] - buf[j];
 			}
 		
-		double amp2 = amplitude(buf.length/2,buf.length);
+		double amp2 = amplitude();
 		
 		for (int i = 0; i < buf.length-order; i++)
 			temp[i] = buf[i]*amp1/amp2;
@@ -170,6 +156,10 @@ public class WavObj {
         System.out.println("100.00%");
 	}
 	
+	public double amplitude() {
+		return amplitude(buf.length/2,buf.length);
+	}
+	
 	public double amplitude(int time, int duration) {
 		if (time-duration/2 < 0 || time+duration/2 > buf.length) return -1;
 		double avg = 0;
@@ -212,5 +202,30 @@ public class WavObj {
        		while (j < width) {b.append(" "); j++;}
        		System.out.println(b.toString());
         }
+	}
+	
+	public double value(int i) {
+		if (i < 0 || i >= buf.length) return -1;
+		return buf[i];
+	}
+	
+	public int getDataSize() {
+		return this.buf.length;
+	}
+	
+	public short getBitsPerSample() {
+		return this.bitdepth;
+	}
+	
+	public int getBytesPerSample() {
+		return this.bitdepth / 8;
+	}
+	
+	public short getChannels() {
+		return channels;
+	}
+	
+	public int getSampleRate() {
+		return samplerate;
 	}
 }

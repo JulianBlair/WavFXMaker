@@ -44,12 +44,12 @@ public class WavDataHandler {
 	         short bitspersample = dis.readShort();
 	         bitspersample = little2big(bitspersample);
 	         short bytespersample = (short) (bitspersample / 8);
-	         System.out.println("Bits per sample: " + bitspersample+"-bit");
+	         System.out.println("Bits per sample: " + bitspersample + "-bit");
 
 	         discard = true;
 	         while (discard) {
-	        	 int read = dis.readInt();
-	        	 if (read == DATA_INTREP) discard = false;
+		       	 int read = dis.readInt();
+		       	 if (read == DATA_INTREP) discard = false;
 	         }
 
 	         int datasize = dis.readInt();
