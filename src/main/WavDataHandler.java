@@ -36,7 +36,7 @@ public class WavDataHandler {
 
 	         int samplerate = dis.readInt();
 	         samplerate = little2big(samplerate);
-	         System.out.println("Sample rate: "+samplerate);
+	         System.out.println("Sample rate: "+samplerate+" Hz");
 	         
 	         dis.readInt(); //byterate
 	         dis.readShort(); //block align
@@ -44,7 +44,7 @@ public class WavDataHandler {
 	         short bitspersample = dis.readShort();
 	         bitspersample = little2big(bitspersample);
 	         short bytespersample = (short) (bitspersample / 8);
-	         System.out.println("Bits per sample: " + bitspersample);
+	         System.out.println("Bits per sample: " + bitspersample+"-bit");
 
 	         discard = true;
 	         while (discard) {
@@ -54,7 +54,8 @@ public class WavDataHandler {
 
 	         int datasize = dis.readInt();
 	         datasize = little2big(datasize) / channels / bytespersample;
-	         System.out.println("Number of samples: " + datasize);
+	         //System.out.println("Number of samples: " + datasize);
+	         System.out.println();
 	         
 	         double[] buf = new double[datasize];
 	         
