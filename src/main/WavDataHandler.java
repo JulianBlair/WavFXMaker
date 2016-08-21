@@ -14,7 +14,8 @@ public class WavDataHandler {
 		
 		WavObj ret = null;
 		
-		System.out.println("---READING FILE---");
+		String[] s = in.split("\\\\");
+		System.out.println("---READING FILE: "+s[s.length-1]+"---");
 		
 		try {  
 	        
@@ -44,12 +45,12 @@ public class WavDataHandler {
 	         short bitspersample = dis.readShort();
 	         bitspersample = little2big(bitspersample);
 	         short bytespersample = (short) (bitspersample / 8);
-	         System.out.println("Bits per sample: " + bitspersample+"-bit");
+	         System.out.println("Bits per sample: " + bitspersample + "-bit");
 
 	         discard = true;
 	         while (discard) {
-	        	 int read = dis.readInt();
-	        	 if (read == DATA_INTREP) discard = false;
+		       	 int read = dis.readInt();
+		       	 if (read == DATA_INTREP) discard = false;
 	         }
 
 	         int datasize = dis.readInt();
@@ -87,7 +88,9 @@ public class WavDataHandler {
 	}
 	
 	static void write(WavObj o, String out) throws IOException {
-		System.out.println("---WRITING FILE---");
+		
+		String[] s = out.split("\\\\");
+		System.out.println("---WRITING FILE: "+s[s.length-1]+"---");
          try {
         // create new data I/O stream
         dos = new DataOutputStream(new FileOutputStream(out)); 
