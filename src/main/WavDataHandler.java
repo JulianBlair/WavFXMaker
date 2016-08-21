@@ -14,7 +14,8 @@ public class WavDataHandler {
 		
 		WavObj ret = null;
 		
-		System.out.println("---READING FILE---");
+		String[] s = in.split("\\\\");
+		System.out.println("---READING FILE: "+s[s.length-1]+"---");
 		
 		try {  
 	        
@@ -87,7 +88,9 @@ public class WavDataHandler {
 	}
 	
 	static void write(WavObj o, String out) throws IOException {
-		System.out.println("---WRITING FILE---");
+		
+		String[] s = out.split("\\\\");
+		System.out.println("---WRITING FILE: "+s[s.length-1]+"---");
          try {
         // create new data I/O stream
         dos = new DataOutputStream(new FileOutputStream(out)); 

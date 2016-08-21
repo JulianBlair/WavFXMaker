@@ -6,23 +6,43 @@ public class WavObj {
 	private short channels, bitdepth;
 	private int samplerate;
 	private double[] buf;
+	private double amplitude;
 	
 	WavObj (short channels, short bitspersample, int samplerate, double[] buf) {
 		this.channels = channels;
 		this.bitdepth = bitspersample;
 		this.samplerate = samplerate;
-		this.buf = buf;
+		this.update(buf);
 	}
 	
 	public void append(WavObj second, double vol) {
+		System.out.println("---COMBINING TWO WAVS---");
 		if (vol < 0 || this.channels != second.channels || this.samplerate != second.samplerate) return;
 		double[] temp = new double[this.buf.length + second.getDataSize()];
-		double amp1 = this.amplitude(), amp2 = second.amplitude();
 		for (int i = 0; i < this.buf.length; i++)
 			temp[i] = this.buf[i];
 		for (int i = 0; i < second.getDataSize(); i++)
-			temp[this.buf.length+i] = second.value(i)*amp1/amp2*vol;
-		this.buf = temp;
+			temp[this.buf.length+i] = second.value(i)*this.amplitude/second.amplitude*vol;
+		this.update(temp);
+	}
+	
+	/**
+	 * Trim audio track between two points.
+	 * @param start Start point in secs, inclusive.
+	 * @param finish End point in secs, exclusive.
+	 */
+	public void trim(int start, int finish) {
+		System.out.println("---EFFECT: TRIM---");
+		int a = start*this.samplerate, b = finish*this.samplerate;
+		if (a < 0 || a >= buf.length || b < 0 || b >= buf.length || a >= b) return;
+		System.out.print("Processing:\t\t");
+		double[] temp = new double[b-a];
+		for (int i = a; i < b; i++) {
+			WavDataHandler.perc(i-a, temp.length, 10);
+			temp[i-a] = buf[i];
+		}
+		this.update(temp);
+        System.out.println("100.00%");
 	}
 	
 	public void diff(int order) {
@@ -43,7 +63,7 @@ public class WavObj {
 		for (int i = 0; i < buf.length-order; i++)
 			temp[i] = buf[i]*amp1/amp2;
 		
-		buf = temp;
+		this.update(temp);
         System.out.println("100.00%");
 	}
 	
@@ -62,11 +82,12 @@ public class WavObj {
 		
 		for (int i = 0; i < temp.length; i++) {
 			WavDataHandler.perc(i, temp.length, 10);
-			if (i % factor == 0) temp[i] = buf[(int)(i/factor)];
-			else temp[i] = ((i%factor)*buf[(int)(i/factor)+1] + (factor-(i%factor))*buf[(int)(i/factor)]) / factor;
+			if ((i/factor)+1 < buf.length) {
+				temp[i] = ((i%factor)*buf[(int)(i/factor)+1] + (factor-(i%factor))*buf[(int)(i/factor)]) / factor;
+			}
 		}
 		
-		buf = temp;
+		this.update(temp);
 	}
 	
 	private void squish(double factor) {
@@ -79,7 +100,7 @@ public class WavObj {
 			temp[i] = buf[(int)(i*factor)];
 		}
 		
-		buf = temp;
+		this.update(temp);
 	}
 	
 	public void reverse() {
@@ -117,7 +138,7 @@ public class WavObj {
 			wet[i] = buf[i] + wet[i-freq]*decay; 
 			wet[i] = wet[i]*wetvol + buf[i]*(1-wetvol);
 		}
-		buf = wet;
+		this.update(wet);
         System.out.println("100.00%");
 	}
 	
@@ -130,7 +151,7 @@ public class WavObj {
 			temp[i] = buf[i];
 		}
         System.out.println("100.00%");
-		buf = temp;
+        this.update(temp);
 	}
 	
 	public void repeat(int times) {
@@ -142,7 +163,7 @@ public class WavObj {
 			for (int j = 0; j < times; j++)
 				temp[i+buf.length*j] = buf[i];
 		}
-		buf = temp;
+		this.update(temp);
         System.out.println("100.00%");
 	}
 	
@@ -160,7 +181,7 @@ public class WavObj {
 		return amplitude(buf.length/2,buf.length);
 	}
 	
-	public double amplitude(int time, int duration) {
+	private double amplitude(int time, int duration) {
 		if (time-duration/2 < 0 || time+duration/2 > buf.length) return -1;
 		double avg = 0;
 		for (int i = 0; i < duration/2; i++) {
@@ -173,6 +194,12 @@ public class WavObj {
 	
 	public void visual(int width) {
 		visual(width, buf.length);
+	}
+	
+	public void convertSamplerate(int samplerate) {
+		this.pitch(this.samplerate/(double)samplerate);
+		System.out.println("---SAMPLE RATE CONVERTED FROM "+this.samplerate+" Hz TO "+samplerate+" Hz---");
+		this.samplerate = samplerate;
 	}
 	
 	public void visual(int width, int length) {
@@ -202,6 +229,11 @@ public class WavObj {
        		while (j < width) {b.append(" "); j++;}
        		System.out.println(b.toString());
         }
+	}
+	
+	private void update(double[] newar) {
+		this.buf = newar;
+		amplitude = this.amplitude();
 	}
 	
 	public double value(int i) {
