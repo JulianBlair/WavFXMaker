@@ -43,12 +43,8 @@ public class WavDataHandler {
 	         samplerate = little2big(samplerate);
 	         System.out.println("Sample rate: "+samplerate);
 	         
-	         int byterate = dis.readInt();
-	         byterate = little2big(byterate);
-	         
-	         short blockalign = dis.readShort();
-	         blockalign = little2big(blockalign);
-	         System.out.println("Block align: "+blockalign);
+	         dis.readInt(); //byterate
+	         dis.readShort(); //block align
 	         
 	         short bitspersample = dis.readShort();
 	         bitspersample = little2big(bitspersample);
@@ -67,11 +63,10 @@ public class WavDataHandler {
 	         
 	         double[] buf = new double[datasize];
 	         
-	         System.out.print("Read data progress: ");
+	         System.out.print("Read data progress:\t");
 	         
 	         for (int i = 0; i < datasize; i++) {
-	        	 double prog = i / (double) datasize;
-	        	 if (i % (datasize/10) == 0) System.out.printf("%.2f%%...",prog*100);
+	        	 perc(i,datasize);
 	        	 byte[] d = new byte[bytespersample];
 	        	 for (int j = 0; j < bytespersample; j++) {
 	        		 d[j] = dis.readByte();
@@ -98,7 +93,7 @@ public class WavDataHandler {
 	}
 	
 	static void write(WavObj o, String in, String out) throws IOException {
-		
+		System.out.println("---WRITING FILE---");
 		// create file input stream
         is = new FileInputStream(in);
         os = new FileOutputStream(out);
@@ -108,7 +103,7 @@ public class WavDataHandler {
         dos = new DataOutputStream(os); 
          
         int bytespersample = o.bitspersample / 8;
-		
+        System.out.print("Writing header...");
 		//Copy first chunk + "fmt "
         boolean discard = true;
         while (discard) {
@@ -128,13 +123,17 @@ public class WavDataHandler {
         //Copy up to "data"
         discard = true;
         while (discard) {
-       	 int read = dis.readInt();
-       	 if (read == DATA_INTREP) discard = false;
-       	 dos.writeInt(read);
+       		int read = dis.readInt();
+       		if (read == DATA_INTREP) discard = false;
+       		dos.writeInt(read);
         }
-        
         dos.writeInt(little2big(o.buf.length * o.channels * bytespersample));
-		for (double f : o.buf) {			
+        System.out.println("DONE");
+        System.out.print("Write data progress:\t");
+        int i = 0, datasize = o.buf.length;
+		for (double f : o.buf) {
+       		perc(i,datasize);
+       		i++;
 			byte[] d = null;
 			switch (bytespersample) {
 			case 4: 
@@ -151,6 +150,7 @@ public class WavDataHandler {
        		 dos.writeByte(d[j]);
        	 	}
 		}
+        System.out.println("100.00%");
 	}
 	
 	static float parse(byte[] d, int bytespersample) {
@@ -210,5 +210,10 @@ public class WavDataHandler {
        	 while (j < width) {b.append(" "); j++;}
        	 System.out.println(b.toString());
         }
+	}
+	
+	private static void perc(int i, int len) {
+   	 	double prog = i / (double) len;
+   	 	if (i % (len/10) == 0) System.out.printf("%.2f%%...",prog*100);
 	}
 }
