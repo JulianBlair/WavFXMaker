@@ -16,6 +16,8 @@ public class WavDataHandler {
 		
 		WavObj ret = null;
 		
+		System.out.println("---READING FILE---");
+		
 		try {  
 			
 			// create file input stream
@@ -49,7 +51,8 @@ public class WavDataHandler {
 	         System.out.println("Block align: "+blockalign);
 	         
 	         short bitspersample = dis.readShort();
-	         short bytespersample = (short) (little2big(bitspersample) / 8);
+	         bitspersample = little2big(bitspersample);
+	         short bytespersample = (short) (bitspersample / 8);
 	         System.out.println("Bits per sample: " + bitspersample);
 
 	         discard = true;
@@ -60,18 +63,24 @@ public class WavDataHandler {
 
 	         int datasize = dis.readInt();
 	         datasize = little2big(datasize) / channels / bytespersample;
+	         System.out.println("Number of samples: " + datasize);
 	         
 	         double[] buf = new double[datasize];
 	         
+	         System.out.print("Read data progress: ");
+	         
 	         for (int i = 0; i < datasize; i++) {
+	        	 double prog = i / (double) datasize;
+	        	 if (i % (datasize/10) == 0) System.out.printf("%.2f%%...",prog*100);
 	        	 byte[] d = new byte[bytespersample];
 	        	 for (int j = 0; j < bytespersample; j++) {
 	        		 d[j] = dis.readByte();
 	        	 }
 	        	 buf[i] = parse(d, bytespersample);
 	         }
+	         System.out.println("100.00%");
 	         
-			ret = new WavObj(channels, blockalign, bitspersample, samplerate, byterate, buf);
+			ret = new WavObj(channels, bitspersample, samplerate, buf);
 	         
 	      }catch(Exception e){
 	         e.printStackTrace();
@@ -91,12 +100,14 @@ public class WavDataHandler {
 	static void write(WavObj o, String in, String out) throws IOException {
 		
 		// create file input stream
-         is = new FileInputStream(in);
-         os = new FileOutputStream(out);
+        is = new FileInputStream(in);
+        os = new FileOutputStream(out);
          
-         // create new data input stream
-         dis = new DataInputStream(is);   
-         dos = new DataOutputStream(os); 
+        // create new data input stream
+        dis = new DataInputStream(is);   
+        dos = new DataOutputStream(os); 
+         
+        int bytespersample = o.bitspersample / 8;
 		
 		//Copy first chunk + "fmt "
         boolean discard = true;
@@ -110,9 +121,9 @@ public class WavDataHandler {
         
         dos.writeShort(little2big(o.channels)); dis.readShort();
         dos.writeInt(little2big(o.samplerate)); dis.readInt();
-        dos.writeInt(little2big(o.byterate)); dis.readInt();
-        dos.writeShort(little2big(o.blockalign)); dis.readShort();
-        dos.writeShort(o.bitspersample); dis.readShort();
+        dos.writeInt(little2big(o.samplerate * o.channels * bytespersample)); dis.readInt();
+        dos.writeShort(little2big((short) (o.channels * bytespersample))); dis.readShort();
+        dos.writeShort(little2big(o.bitspersample)); dis.readShort();
         
         //Copy up to "data"
         discard = true;
@@ -121,8 +132,6 @@ public class WavDataHandler {
        	 if (read == DATA_INTREP) discard = false;
        	 dos.writeInt(read);
         }
-        
-        int bytespersample = little2big(o.bitspersample) / 8;
         
         dos.writeInt(little2big(o.buf.length * o.channels * bytespersample));
 		for (double f : o.buf) {			

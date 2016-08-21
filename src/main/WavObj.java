@@ -1,16 +1,14 @@
 package main;
 
 public class WavObj {
-	short channels, blockalign, bitspersample;
-	int samplerate, byterate;
+	short channels, bitspersample;
+	int samplerate;
 	double[] buf;
 	
-	WavObj (short channels, short blockalign, short bitspersample, int samplerate, int byterate, double[] buf) {
+	WavObj (short channels, short bitspersample, int samplerate, double[] buf) {
 		this.channels = channels;
-		this.blockalign = blockalign;
 		this.bitspersample = bitspersample;
 		this.samplerate = samplerate;
-		this.byterate = byterate;
 		this.buf = buf;
 	}
 	
