@@ -8,33 +8,43 @@ public class WavObj {
 	private double[] buf;
 	private double amplitude;
 	
-	WavObj (short channels, short bitspersample, int samplerate, double[] buf) {
+	WavObj (short channels, short bitdepth, int samplerate, double[] buf) {
 		this.channels = channels;
-		this.bitdepth = bitspersample;
+		this.bitdepth = bitdepth;
 		this.samplerate = samplerate;
 		this.update(buf);
 	}
 	
-	public void append(WavObj second, double vol) {
+	public void append(WavObj second, double vol, boolean relvol) {
 		System.out.println("---COMBINING TWO WAVS---");
 		if (vol < 0 || this.channels != second.channels || this.bitdepth < second.bitdepth) return;
+		double amp1 = 1, amp2 = 1;
+		if (relvol) {
+			amp1 = this.amplitude;
+			amp2 = second.amplitude;
+		}
 		second.convertSamplerate(this.samplerate);
 		double[] temp = new double[this.buf.length + second.getDataSize()];
 		for (int i = 0; i < this.buf.length; i++)
 			temp[i] = this.buf[i];
 		for (int i = 0; i < second.getDataSize(); i++)
-			temp[this.buf.length+i] = second.value(i)*this.amplitude/second.amplitude*vol;
+			temp[this.buf.length+i] = second.value(i)*amp1/amp2*vol;
 		this.update(temp);
 		System.out.println("DONE");
 	}
 	
-	public void mix(WavObj second, double vol, double start) {
+	public void mix(WavObj second, double vol, boolean relvol, double start) {
 		System.out.println("---MIXING TWO WAVS---");
 		int a = (int) (start*this.samplerate);
 		if (a < 0 || a >= this.getDataSize() || vol < 0 || this.channels != second.channels || this.bitdepth < second.bitdepth) return;
+		double amp1 = 1, amp2 = 1;
+		if (relvol) {
+			amp1 = this.amplitude;
+			amp2 = second.amplitude;
+		}
 		second.convertSamplerate(this.samplerate);
 		for (int i = 0; (i < second.getDataSize() && a+i < this.getDataSize()); i++)
-			buf[a+i] += second.value(i)*this.amplitude/second.amplitude*vol;
+			buf[a+i] += second.value(i)*amp1/amp2*vol;
 		update();
 		System.out.println("DONE");
 	}
