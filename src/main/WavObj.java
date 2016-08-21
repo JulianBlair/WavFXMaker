@@ -3,15 +3,40 @@ package main;
 import java.util.*;
 
 public class WavObj {
-	short channels, bitspersample;
-	int samplerate;
-	double[] buf;
+	private short channels, bitspersample;
+	private int samplerate;
+	private double[] buf;
 	
 	WavObj (short channels, short bitspersample, int samplerate, double[] buf) {
 		this.channels = channels;
 		this.bitspersample = bitspersample;
 		this.samplerate = samplerate;
 		this.buf = buf;
+	}
+	
+	public double value(int i) {
+		if (i < 0 || i >= buf.length) return -1;
+		return buf[i];
+	}
+	
+	public int getDataSize() {
+		return this.buf.length;
+	}
+	
+	public short getBitsPerSample() {
+		return this.bitspersample;
+	}
+	
+	public int getBytesPerSample() {
+		return this.bitspersample / 8;
+	}
+	
+	public short getChannels() {
+		return channels;
+	}
+	
+	public int getSampleRate() {
+		return samplerate;
 	}
 	
 	public void diff(int order) {

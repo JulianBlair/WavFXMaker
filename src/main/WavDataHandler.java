@@ -93,8 +93,7 @@ public class WavDataHandler {
          
         System.out.print("Writing header...");
         
-        int bytespersample = o.bitspersample / 8;
-        int subchunk2Size = o.buf.length * o.channels * bytespersample;
+        int subchunk2Size = o.getDataSize() * o.getChannels() * o.getBytesPerSample();
         byte[] chunkID = {'R', 'I', 'F', 'F'};
         int chunkSize = 36 + subchunk2Size;
         byte[] format = {'W', 'A', 'V', 'E'};
@@ -109,24 +108,23 @@ public class WavDataHandler {
         dos.write(subchunk1ID);
         dos.writeInt(little2big(subchunk1Size));
         dos.writeShort(little2big(audioFormat));        
-        dos.writeShort(little2big(o.channels)); 
-        dos.writeInt(little2big(o.samplerate)); 
-        dos.writeInt(little2big(o.samplerate * o.channels * bytespersample)); 
-        dos.writeShort(little2big((short) (o.channels * bytespersample))); 
-        dos.writeShort(little2big(o.bitspersample)); 
+        dos.writeShort(little2big(o.getChannels())); 
+        dos.writeInt(little2big(o.getSampleRate())); 
+        dos.writeInt(little2big(o.getSampleRate() * o.getChannels() * o.getBytesPerSample())); 
+        dos.writeShort(little2big((short) (o.getChannels() * o.getBytesPerSample()))); 
+        dos.writeShort(little2big(o.getBitsPerSample())); 
         dos.write(subchunk2ID);
         dos.writeInt(little2big(subchunk2Size));
         
         System.out.println("DONE");
         
         System.out.print("Write data progress:\t");
-        int i = 0, datasize = o.buf.length;
-		for (double f : o.buf) {
+        int datasize = o.getDataSize();
+		for (int i = 0; i < datasize; i++) {
        		perc(i,datasize,10);
-       		i++;
 			byte[] d = null;
-			long rnd = Math.round(f);
-			switch (bytespersample) {
+			long rnd = Math.round(o.value(i));
+			switch (o.getBytesPerSample()) {
 			case 4: 
 				d = big2little((int) rnd);
 				break;
@@ -137,7 +135,7 @@ public class WavDataHandler {
 				d = big2little((byte) rnd);
 				break;
 			}
-			for (int j = 0; j < bytespersample; j++) {
+			for (int j = 0; j < o.getBytesPerSample(); j++) {
        		 dos.writeByte(d[j]);
        	 	}
 		}
