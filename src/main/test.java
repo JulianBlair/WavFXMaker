@@ -9,8 +9,8 @@ public class test {
 	
 	public static void main(String[] args) throws IOException {
 		
-		INPUT_FILE = "C:\\Users\\Julian\\Music\\~Sound Packs\\Fantom Claps\\fantclaps101(01).wav";
-		//INPUT_FILE = "C:\\Users\\Julian\\Desktop\\wavtest.wav";
+		//INPUT_FILE = "C:\\Users\\Julian\\Music\\~Sound Packs\\Fantom Claps\\fantclaps101(01).wav";
+		INPUT_FILE = "C:\\Users\\Julian\\Desktop\\wavtest_small.wav";
 		OUTPUT_FILE = "C:\\Users\\Julian\\Desktop\\output.wav";
 		
         WavObj wave = WavDataHandler.read(INPUT_FILE);
@@ -24,6 +24,6 @@ public class test {
         //wave.diff(2);
         //wave.volume(2);
         
-        WavDataHandler.write(wave, INPUT_FILE, OUTPUT_FILE);
+        WavDataHandler.write(wave, OUTPUT_FILE);
 	}
 }

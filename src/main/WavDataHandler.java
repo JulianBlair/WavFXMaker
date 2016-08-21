@@ -85,39 +85,38 @@ public class WavDataHandler {
 		
 	}
 	
-	static void write(WavObj o, String in, String out) throws IOException {
+	static void write(WavObj o, String out) throws IOException {
 		System.out.println("---WRITING FILE---");
          try {
         // create new data I/O stream
-        dis = new DataInputStream(new FileInputStream(in));   
         dos = new DataOutputStream(new FileOutputStream(out)); 
          
-        int bytespersample = o.bitspersample / 8;
         System.out.print("Writing header...");
-		//Copy first chunk + "fmt "
-        boolean discard = true;
-        while (discard) {
-	       	 int read = dis.readInt();
-	       	 if (read == FMT_INTREP) discard = false;
-	       	 dos.writeInt(read);
-        }
-        dos.writeInt(dis.readInt()); //Chunk 1 size
-        dos.writeShort(dis.readShort()); //PCM
         
-        dos.writeShort(little2big(o.channels)); dis.readShort();
-        dos.writeInt(little2big(o.samplerate)); dis.readInt();
-        dos.writeInt(little2big(o.samplerate * o.channels * bytespersample)); dis.readInt();
-        dos.writeShort(little2big((short) (o.channels * bytespersample))); dis.readShort();
-        dos.writeShort(little2big(o.bitspersample)); dis.readShort();
+        int bytespersample = o.bitspersample / 8;
+        int subchunk2Size = o.buf.length * o.channels * bytespersample;
+        byte[] chunkID = {'R', 'I', 'F', 'F'};
+        int chunkSize = 36 + subchunk2Size;
+        byte[] format = {'W', 'A', 'V', 'E'};
+        byte[] subchunk1ID = {'f', 'm', 't', ' '};
+        int subchunk1Size = 16;
+        short audioFormat = 1;
+        byte[] subchunk2ID = {'d', 'a', 't', 'a'};
         
-        //Copy up to "data"
-        discard = true;
-        while (discard) {
-       		int read = dis.readInt();
-       		if (read == DATA_INTREP) discard = false;
-       		dos.writeInt(read);
-        }
-        dos.writeInt(little2big(o.buf.length * o.channels * bytespersample));
+        dos.write(chunkID);
+        dos.writeInt(little2big(chunkSize));
+        dos.write(format);
+        dos.write(subchunk1ID);
+        dos.writeInt(little2big(subchunk1Size));
+        dos.writeShort(little2big(audioFormat));        
+        dos.writeShort(little2big(o.channels)); 
+        dos.writeInt(little2big(o.samplerate)); 
+        dos.writeInt(little2big(o.samplerate * o.channels * bytespersample)); 
+        dos.writeShort(little2big((short) (o.channels * bytespersample))); 
+        dos.writeShort(little2big(o.bitspersample)); 
+        dos.write(subchunk2ID);
+        dos.writeInt(little2big(subchunk2Size));
+        
         System.out.println("DONE");
         
         System.out.print("Write data progress:\t");
